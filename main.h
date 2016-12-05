@@ -21,8 +21,8 @@ extern "C" {
 #include <stdint.h>
 
 #define DEBUG
-        //#define DUMP_LOADED_RULES
-        //#define DUMP_POOLS
+        //        #define DUMP_LOADED_RULES
+#define DUMP_POOLS
 
 #define WILDCARD_UPPER_BOUND    10000
 
@@ -42,6 +42,22 @@ extern "C" {
 #define UNIQUE_VALUE_RATIO_PRTL         0.02
 #define UNIQUE_VALUE_RATIO_PORT_SRC     0.1
 #define UNIQUE_VALUE_RATIO_PORT_DST     0.1
+
+#define MAX_NB_UNIQUE_VALUE_INGRESS_PORT (uint64_t)(pow(2,32)-1)
+#define MAX_NB_UNIQUE_VALUE_METADATA     (uint64_t)(pow(2,64)-1)
+#define MAX_NB_UNIQUE_VALUE_ETH_SRC      (uint64_t)(pow(2,48)-1)
+#define MAX_NB_UNIQUE_VALUE_ETH_DST      (uint64_t)(pow(2,48)-1)
+#define MAX_NB_UNIQUE_VALUE_ETH_TYPE     (uint64_t)(pow(2,16)-1)
+#define MAX_NB_UNIQUE_VALUE_VID          (uint64_t)(pow(2,12)-1)
+#define MAX_NB_UNIQUE_VALUE_VPRTY        (uint64_t)(pow(2,3)-1 )
+#define MAX_NB_UNIQUE_VALUE_TOS          (uint64_t)(pow(2,6)-1 )
+#define MAX_NB_UNIQUE_VALUE_MPLS_LBL     (uint64_t)(pow(2,20)-1)
+#define MAX_NB_UNIQUE_VALUE_MPLS_TFC     (uint64_t)(pow(2,3)-1 )
+#define MAX_NB_UNIQUE_VALUE_IP_SRC       (uint64_t)(pow(2,32)-1)
+#define MAX_NB_UNIQUE_VALUE_IP_DST       (uint64_t)(pow(2,32)-1)
+#define MAX_NB_UNIQUE_VALUE_PRTL         (uint64_t)(pow(2,8)-1 )
+#define MAX_NB_UNIQUE_VALUE_PORT_SRC     (uint64_t)(pow(2,16)-1)
+#define MAX_NB_UNIQUE_VALUE_PORT_DST     (uint64_t)(pow(2,16)-1)
 
 #define MAX_UINT3       0x7
 #define MAX_UINT6       0x3F

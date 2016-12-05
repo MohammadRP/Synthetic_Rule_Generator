@@ -389,6 +389,8 @@ void generate_fileds_pool(void) {
 
         // ether type ----------------------------------------------------------
         nb_unique_ether_type = nb_rules * UNIQUE_VALUE_RATIO_ETH_TYPE;
+        if (nb_unique_ether_type > MAX_NB_UNIQUE_VALUE_ETH_TYPE)
+                nb_unique_ether_type = MAX_NB_UNIQUE_VALUE_ETH_TYPE;
         ether_type_pool = (uint16_t *) malloc(nb_unique_ether_type * sizeof (uint16_t));
 #ifdef DUMP_POOLS
         printf("Generating %d ether type ... \n", nb_unique_ether_type);
@@ -414,6 +416,8 @@ void generate_fileds_pool(void) {
 
         // vid -----------------------------------------------------------------
         nb_unique_vid = nb_rules * UNIQUE_VALUE_RATIO_VID;
+        if (nb_unique_vid > MAX_NB_UNIQUE_VALUE_VID)
+                nb_unique_vid = MAX_NB_UNIQUE_VALUE_VID;
         vid_pool = (uint16_t *) malloc(nb_unique_vid * sizeof (uint16_t));
 #ifdef DUMP_POOLS
         printf("Generating %d vid ... \n", nb_unique_vid);
@@ -428,7 +432,7 @@ void generate_fileds_pool(void) {
                         continue;
                 vid_pool[i] = new_vid;
 #ifdef DUMP_POOLS
-                printf("unique vid type %-3d --> 0x%03x\n", i, vid_pool[i]);
+                printf("unique vid %-3d --> 0x%03x\n", i, vid_pool[i]);
 #endif
                 i++;
         }
@@ -446,7 +450,7 @@ void generate_fileds_pool(void) {
         for (i = 0; i < nb_unique_vprty; i++) {
                 vprty_pool[i] = i;
 #ifdef DUMP_POOLS
-                printf("unique vprty type %-3d --> 0x%1x\n", i, vprty_pool[i]);
+                printf("unique vprty %-3d --> 0x%1x\n", i, vprty_pool[i]);
 #endif
         }
 #ifdef DUMP_POOLS
@@ -463,7 +467,7 @@ void generate_fileds_pool(void) {
         for (i = 0; i < nb_unique_tos; i++) {
                 tos_pool[i] = i;
 #ifdef DUMP_POOLS
-                printf("unique tos type %-3d --> 0x%02x\n", i, tos_pool[i]);
+                printf("unique tos %-3d --> 0x%02x\n", i, tos_pool[i]);
 #endif
         }
 #ifdef DUMP_POOLS
@@ -474,6 +478,8 @@ void generate_fileds_pool(void) {
 
         // mpls_lbl -----------------------------------------------------------
         nb_unique_mpls_lbl = nb_rules * UNIQUE_VALUE_RATIO_MPLS_LBL;
+        if (nb_unique_mpls_lbl > MAX_NB_UNIQUE_VALUE_MPLS_LBL)
+                nb_unique_mpls_lbl = MAX_NB_UNIQUE_VALUE_MPLS_LBL;
         mpls_lbl_pool =
                 (uint32_t *) malloc(nb_unique_mpls_lbl * sizeof (uint32_t));
 #ifdef DUMP_POOLS
