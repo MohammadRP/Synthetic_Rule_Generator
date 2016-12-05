@@ -17,8 +17,15 @@
 #include <unistd.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 
 #include "main.h"
+
+char *classbench_ruleset_filename = NULL;
+char *synthetic_ruleset_filename = NULL;
+
+float wildcard_ratio = -1;
+float wildcard_threshold = -1;
 
 int nb_rules;
 rule_t *rules;
@@ -46,6 +53,8 @@ int nb_unique_mpls_lbl;
 int nb_unique_mpls_tfc;
 
 
+void usage(char *filename);
+void parse_args(int argc, char** argv);
 void init(void);
 void load_classbench_five_tuples(void);
 void generate_fileds_pool(void);
@@ -56,6 +65,7 @@ void dump_rules(void);
  * 
  */
 int main(int argc, char** argv) {
+        parse_args(argc, argv);
         init();
         load_classbench_five_tuples();
         generate_fileds_pool();
@@ -64,23 +74,72 @@ int main(int argc, char** argv) {
         return (EXIT_SUCCESS);
 }
 
+void usage(char *filename) {
+        printf("Usage: %s [OPTION] ...\n", filename);
+        printf("  -i   input ClassBench file name\n");
+        printf("  -o   output synthetic file name\n");
+        printf("  -w   wildcard ratio\n");
+        printf("  -h   print this help\n");
+        exit(EXIT_FAILURE);
+}
+
+void parse_args(int argc, char** argv) {
+        int c;
+        opterr = 0;
+        while ((c = getopt(argc, argv, "hi:o:w:")) != -1) {
+                switch (c) {
+                        case 'i': // input 5-tuple ClassBench rule set
+                                classbench_ruleset_filename = strdup(optarg);
+                                break;
+                        case 'o': // output 15-tuple synthetic rule set
+                                synthetic_ruleset_filename = strdup(optarg);
+                                break;
+                        case 'w': // wildcard ratio
+                                wildcard_ratio = atof(optarg);
+                                break;
+                        case '?':
+                        case 'h':
+                                usage(argv[0]);
+                                break;
+                        default:
+                                usage(argv[0]);
+                                break;
+                }
+        }
+        if (classbench_ruleset_filename == NULL) {
+                printf("input ClassBench file name does not specified\n");
+                usage(argv[0]);
+        }
+        if (synthetic_ruleset_filename == NULL) {
+                printf("output synthetic file name does not specified\n");
+                usage(argv[0]);
+        }
+        if (wildcard_ratio < 0) {
+                printf("wildcard ratio does not specified\n");
+                usage(argv[0]);
+        }
+}
+
 void init(void) {
 
         // check availability of input rules file ------------------------------
-        if (access(CLASSBENCH_RULESET_FILENAME, F_OK) != 0) {
-                printf("%s does not exist\n", CLASSBENCH_RULESET_FILENAME);
+        if (access(classbench_ruleset_filename, F_OK) != 0) {
+                printf("%s does not exist\n", classbench_ruleset_filename);
                 exit(1);
         }
-        if (access(CLASSBENCH_RULESET_FILENAME, R_OK) != 0) {
-                printf("Can not read %s\n", CLASSBENCH_RULESET_FILENAME);
+        if (access(classbench_ruleset_filename, R_OK) != 0) {
+                printf("Can not read %s\n", classbench_ruleset_filename);
                 exit(1);
         }
 
         // check availability of output rules file -----------------------------
-        if (access(SYNTHETIC_RULESET_FILENAME, F_OK) == 0) {
-                printf("%s already exist\n", SYNTHETIC_RULESET_FILENAME);
+        if (access(synthetic_ruleset_filename, F_OK) == 0) {
+                printf("%s already exist\n", synthetic_ruleset_filename);
                 exit(1);
         }
+
+        // initialize wildcard ratio
+        wildcard_threshold = wildcard_ratio * 100;
 
         // initialize random
         srand(time(NULL));
@@ -89,7 +148,7 @@ void init(void) {
         FILE * fp;
         char ch;
         int nb_lines = 0;
-        fp = fopen(CLASSBENCH_RULESET_FILENAME, "r");
+        fp = fopen(classbench_ruleset_filename, "r");
         while (!feof(fp)) {
                 ch = fgetc(fp);
                 if (ch == '\n') {
@@ -130,7 +189,7 @@ void load_classbench_five_tuples(void) {
         uint8_t proto, proto_mask;
         uint16_t ext, ext_mask;
 
-        rules_file = fopen(CLASSBENCH_RULESET_FILENAME, "r");
+        rules_file = fopen(classbench_ruleset_filename, "r");
         i = 0;
         while ((read = getline(&line, &len, rules_file)) != -1) {
 #ifdef DUMP_LOADED_RULES
@@ -468,7 +527,7 @@ void generate_full_rules(void) {
         for (i = 0; i < nb_rules; i++) {
                 // add ingress port
                 random_wildcard = rand() % WILDCARD_UPPER_BOUND;
-                if (random_wildcard < WILDCARD_THRESHOLD) {
+                if (random_wildcard < wildcard_threshold) {
                         rules[i].mask.ingress_ports_mask = 0;
                 } else {
                         rules[i].mask.ingress_ports_mask = MAX_UINT8;
@@ -478,7 +537,7 @@ void generate_full_rules(void) {
 
                 // add metadata
                 random_wildcard = rand() % WILDCARD_UPPER_BOUND;
-                if (random_wildcard < WILDCARD_THRESHOLD) {
+                if (random_wildcard < wildcard_threshold) {
                         rules[i].mask.metadata_mask = 0;
                 } else {
                         rules[i].mask.metadata_mask = MAX_UINT8;
@@ -489,7 +548,7 @@ void generate_full_rules(void) {
 
                 // add eth src
                 random_wildcard = rand() % WILDCARD_UPPER_BOUND;
-                if (random_wildcard < WILDCARD_THRESHOLD) {
+                if (random_wildcard < wildcard_threshold) {
                         rules[i].mask.eth_src_mask = 0;
                 } else {
                         rules[i].mask.eth_src_mask = MAX_UINT8;
@@ -510,7 +569,7 @@ void generate_full_rules(void) {
 
                 // add eth dst
                 random_wildcard = rand() % WILDCARD_UPPER_BOUND;
-                if (random_wildcard < WILDCARD_THRESHOLD) {
+                if (random_wildcard < wildcard_threshold) {
                         rules[i].mask.eth_dst_mask = 0;
                 } else {
                         rules[i].mask.eth_dst_mask = MAX_UINT8;
@@ -531,7 +590,7 @@ void generate_full_rules(void) {
 
                 // add ether type
                 random_wildcard = rand() % WILDCARD_UPPER_BOUND;
-                if (random_wildcard < WILDCARD_THRESHOLD) {
+                if (random_wildcard < wildcard_threshold) {
                         rules[i].mask.ether_type_mask = 0;
                 } else {
                         rules[i].mask.ether_type_mask = MAX_UINT8;
@@ -541,7 +600,7 @@ void generate_full_rules(void) {
 
                 // add vid & vprty
                 random_wildcard = rand() % WILDCARD_UPPER_BOUND;
-                if (random_wildcard < WILDCARD_THRESHOLD) {
+                if (random_wildcard < wildcard_threshold) {
                         rules[i].mask.vid_mask = 0;
                         rules[i].mask.vprty_mask = 0;
                 } else {
@@ -557,7 +616,7 @@ void generate_full_rules(void) {
 
                 // add tos
                 random_wildcard = rand() % WILDCARD_UPPER_BOUND;
-                if (random_wildcard < WILDCARD_THRESHOLD) {
+                if (random_wildcard < wildcard_threshold) {
                         rules[i].mask.tos_mask = 0;
                 } else {
                         rules[i].mask.tos_mask = MAX_UINT8;
@@ -567,7 +626,7 @@ void generate_full_rules(void) {
 
                 // add mpls_lbl & mpls_tfc
                 random_wildcard = rand() % WILDCARD_UPPER_BOUND;
-                if (random_wildcard < WILDCARD_THRESHOLD) {
+                if (random_wildcard < wildcard_threshold) {
                         rules[i].mask.mpls_lbl_mask = 0;
                         rules[i].mask.mpls_tfc_mask = 0;
                 } else {
@@ -586,15 +645,15 @@ void generate_full_rules(void) {
 }
 
 void dump_rules(void) {
-        
+
         printf("\nDumping generated rules ...\n");
         sleep(1);
-        
+
         int i;
         FILE *fp;
-        fp = fopen(SYNTHETIC_RULESET_FILENAME, "w");
+        fp = fopen(synthetic_ruleset_filename, "w");
         if (fp == NULL) {
-                printf("Can not open file : %s\n", SYNTHETIC_RULESET_FILENAME);
+                printf("Can not open file : %s\n", synthetic_ruleset_filename);
                 exit(EXIT_FAILURE);
         }
         for (i = 0; i < nb_rules; i++) {

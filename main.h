@@ -24,12 +24,8 @@ extern "C" {
         //#define DUMP_LOADED_RULES
         //#define DUMP_POOLS
 
-#define WILDCARD_RATIO          1
-#define WILDCARD_THRESHOLD      (WILDCARD_RATIO * 100)
 #define WILDCARD_UPPER_BOUND    10000
 
-#define CLASSBENCH_RULESET_FILENAME     "/home/classBench/rulesets/ipc_1k"
-#define SYNTHETIC_RULESET_FILENAME      "/home/synthetic_rules/ipc_15f_1k"
 
 #define UNIQUE_VALUE_RATIO_INGRESS_PORT 0.02
 #define UNIQUE_VALUE_RATIO_METADATA     0.02
